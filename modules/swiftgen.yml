@@ -1,0 +1,23 @@
+input_dir: Sources/Generated/
+output_dir: Sources/Generated/
+
+xcassets:
+  - inputs:
+      - Design/Resources/Colors.xcassets
+    outputs:
+      templatePath: Templates/xcassets/assets_swift5_swiftui.stencil
+      params:
+        forceProvidesNamespaces: true
+        publicAccess: true
+        forceFileNameEnum: true
+      output: Design/Design+Assets.swift
+
+  - inputs:
+      - Images/Resources/Assets.xcassets
+    outputs:
+      templatePath: Templates/xcassets/assets_swift5_swiftui.stencil
+      params:
+        forceProvidesNamespaces: true
+        publicAccess: true
+        forceFileNameEnum: true
+      output: Images/Images+Assets.swift
