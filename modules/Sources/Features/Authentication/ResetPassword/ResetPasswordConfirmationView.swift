@@ -4,8 +4,9 @@
 //
 //  Created by Krzysiek on 2024-12-08.
 //
-import Lottie
 import SwiftUI
+
+import Lottie
 import UIComponents
 
 // MARK: - VerifyEmailView

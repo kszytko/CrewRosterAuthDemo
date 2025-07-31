@@ -9,10 +9,10 @@ import Testing
 
 @testable import Authentication
 
-import AuthManager
+import AuthProvider
 import Factory
 
-// MARK: - AuthManagerTests
+// MARK: - AuthProviderTests
 @Suite(.serialized)
 @MainActor
 final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
@@ -68,19 +68,19 @@ final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
         sut.email = email
         sut.password = password
         sut.staffNumber = staffNumber
-        mockAuthManager.stubbedCreateUserResult = userData
+        mockAuthProvider.stubbedCreateUserResult = userData
 
         await sut.registerUser()
 
         // Then
-        #expect(mockAuthManager.invokedCreateUserCount == 1)
-        #expect(mockAuthManager.invokedCreateUserParameters?.email == email)
-        #expect(mockAuthManager.invokedCreateUserParameters?.password == password)
+        #expect(mockAuthProvider.invokedCreateUserCount == 1)
+        #expect(mockAuthProvider.invokedCreateUserParameters?.email == email)
+        #expect(mockAuthProvider.invokedCreateUserParameters?.password == password)
 
-        #expect(mockAuthManager.invokedDeleteUserCount == 0)
+        #expect(mockAuthProvider.invokedDeleteUserCount == 0)
 
-        #expect(mockAuthManager.invokedSendEmailVerificationCount == 1)
-        #expect(mockAuthManager.invokedsignOutCount == 1)
+        #expect(mockAuthProvider.invokedSendEmailVerificationCount == 1)
+        #expect(mockAuthProvider.invokedsignOutCount == 1)
 
         #expect(sut.alertError == nil)
     }
@@ -96,20 +96,20 @@ final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
         let userData = MockUserService()
         userData.stubbedUid = userID
 
-        mockAuthManager.stubbedCreateUserResult = MockUserService()
-        mockAuthManager.stubbedCreateUserError = AuthError.wrongPassword
+        mockAuthProvider.stubbedCreateUserResult = MockUserService()
+        mockAuthProvider.stubbedCreateUserError = AuthError.wrongPassword
 
         // When
         await sut.registerUser()
 
         // Then
-        #expect(mockAuthManager.invokedCreateUserCount == 1)
-        #expect(mockAuthManager.invokedCreateUserParameters?.email == email)
-        #expect(mockAuthManager.invokedCreateUserParameters?.password == password)
-        #expect(mockAuthManager.invokedDeleteUserCount == 1)
+        #expect(mockAuthProvider.invokedCreateUserCount == 1)
+        #expect(mockAuthProvider.invokedCreateUserParameters?.email == email)
+        #expect(mockAuthProvider.invokedCreateUserParameters?.password == password)
+        #expect(mockAuthProvider.invokedDeleteUserCount == 1)
 
-        #expect(mockAuthManager.invokedSendEmailVerificationCount == 0)
-        #expect(mockAuthManager.invokedsignOutCount == 1)
+        #expect(mockAuthProvider.invokedSendEmailVerificationCount == 0)
+        #expect(mockAuthProvider.invokedsignOutCount == 1)
 
         let authError = try #require(sut.alertError as? AuthError)
         #expect(authError == AuthError.wrongPassword)
@@ -122,19 +122,19 @@ final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
         sut.email = email
         sut.password = password
 
-        mockAuthManager.stubbedCreateUserResult = nil
+        mockAuthProvider.stubbedCreateUserResult = nil
 
         // When
         await sut.registerUser()
 
         // Then
-        #expect(mockAuthManager.invokedCreateUserCount == 1)
-        #expect(mockAuthManager.invokedCreateUserParameters?.email == email)
-        #expect(mockAuthManager.invokedCreateUserParameters?.password == password)
-        #expect(mockAuthManager.invokedDeleteUserCount == 1)
+        #expect(mockAuthProvider.invokedCreateUserCount == 1)
+        #expect(mockAuthProvider.invokedCreateUserParameters?.email == email)
+        #expect(mockAuthProvider.invokedCreateUserParameters?.password == password)
+        #expect(mockAuthProvider.invokedDeleteUserCount == 1)
 
-        #expect(mockAuthManager.invokedSendEmailVerificationCount == 0)
-        #expect(mockAuthManager.invokedsignOutCount == 1)
+        #expect(mockAuthProvider.invokedSendEmailVerificationCount == 0)
+        #expect(mockAuthProvider.invokedsignOutCount == 1)
 
         let authError = try #require(sut.alertError as? AuthError)
         #expect(authError == AuthError.operationNotAllowed)
@@ -153,19 +153,19 @@ final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
         sut.password = password
         sut.staffNumber = staffNumber
 
-        mockAuthManager.stubbedCreateUserResult = userData
-        mockAuthManager.stubbedCreateUserError = AuthError.operationNotAllowed
+        mockAuthProvider.stubbedCreateUserResult = userData
+        mockAuthProvider.stubbedCreateUserError = AuthError.operationNotAllowed
 
         await sut.registerUser()
 
         // Then
-        #expect(mockAuthManager.invokedCreateUserCount == 1)
-        #expect(mockAuthManager.invokedCreateUserParameters?.email == email)
-        #expect(mockAuthManager.invokedCreateUserParameters?.password == password)
-        #expect(mockAuthManager.invokedDeleteUserCount == 1)
+        #expect(mockAuthProvider.invokedCreateUserCount == 1)
+        #expect(mockAuthProvider.invokedCreateUserParameters?.email == email)
+        #expect(mockAuthProvider.invokedCreateUserParameters?.password == password)
+        #expect(mockAuthProvider.invokedDeleteUserCount == 1)
 
-        #expect(mockAuthManager.invokedSendEmailVerificationCount == 0)
-        #expect(mockAuthManager.invokedsignOutCount == 1)
+        #expect(mockAuthProvider.invokedSendEmailVerificationCount == 0)
+        #expect(mockAuthProvider.invokedsignOutCount == 1)
 
         let storeError = try #require(sut.alertError as? AuthError)
         #expect(storeError == AuthError.operationNotAllowed)
@@ -179,15 +179,15 @@ final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
         sut.email = email
         sut.password = password
 
-        mockAuthManager.stubbedCreateUserResult = MockUserService()
+        mockAuthProvider.stubbedCreateUserResult = MockUserService()
 
         // When
-        mockAuthManager.stubbedCreateUserError = AuthError.wrongPassword
+        mockAuthProvider.stubbedCreateUserError = AuthError.wrongPassword
         await sut.registerUser()
 
         // Then
-        #expect(mockAuthManager.invokedCreateUserCount == 1)
-        #expect(mockAuthManager.invokedDeleteUserCount == 1)
+        #expect(mockAuthProvider.invokedCreateUserCount == 1)
+        #expect(mockAuthProvider.invokedDeleteUserCount == 1)
     }
 
     /// Ensures registration fails when sending email verification throws an error
@@ -200,18 +200,18 @@ final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
 
         let userData = MockUserService()
         userData.stubbedUid = userID
-        mockAuthManager.stubbedCreateUserResult = MockUserService()
+        mockAuthProvider.stubbedCreateUserResult = MockUserService()
 
         // When
-        mockAuthManager.stubbedSendEmailVerificationError = AuthError.networkError
+        mockAuthProvider.stubbedSendEmailVerificationError = AuthError.networkError
         await sut.registerUser()
 
         // Then
-        #expect(mockAuthManager.invokedCreateUserCount == 1)
-        #expect(mockAuthManager.invokedDeleteUserCount == 0)
+        #expect(mockAuthProvider.invokedCreateUserCount == 1)
+        #expect(mockAuthProvider.invokedDeleteUserCount == 0)
 
-        #expect(mockAuthManager.invokedSendEmailVerificationCount == 1)
-        #expect(mockAuthManager.invokedsignOutCount == 2)
+        #expect(mockAuthProvider.invokedSendEmailVerificationCount == 1)
+        #expect(mockAuthProvider.invokedsignOutCount == 2)
 
         let authError = try #require(sut.alertError as? AuthError)
         #expect(authError == AuthError.networkError)
@@ -222,7 +222,7 @@ final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
     @Test
     func registerUser_togglesValidationSheet_whenRegistrationSucceeds() async {
         // When
-        mockAuthManager.stubbedCreateUserResult = MockUserService()
+        mockAuthProvider.stubbedCreateUserResult = MockUserService()
 
         await sut.registerUser()
 
@@ -234,7 +234,7 @@ final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
     @Test(arguments: [AuthError.emailAlreadyInUse, AuthError.invalidEmail, AuthError.userNotFound, AuthError.domainNotAllowed])
     func registerUser_setsEmailError_whenErrorOccurs(error: AuthError) async {
         // When
-        mockAuthManager.stubbedCreateUserError = error
+        mockAuthProvider.stubbedCreateUserError = error
         await sut.registerUser()
 
         // Then
@@ -244,7 +244,7 @@ final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
     @Test(arguments: [AuthError.weakPassword])
     func registerUser_setsPasswordError_whenErrorOccurs(error: AuthError) async {
         // When
-        mockAuthManager.stubbedCreateUserError = error
+        mockAuthProvider.stubbedCreateUserError = error
         await sut.registerUser()
 
         // Then
@@ -254,7 +254,7 @@ final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
     @Test(arguments: [AuthError.keychainError, AuthError.operationNotAllowed, AuthError.invalidCredentials])
     func registerUser_setAlertError_whenErrorOccurs(error: AuthError) async throws {
         // When
-        mockAuthManager.stubbedCreateUserError = error
+        mockAuthProvider.stubbedCreateUserError = error
         await sut.registerUser()
 
         // Then
@@ -266,18 +266,18 @@ final class RegisterViewModelTests: BaseTestCase, @unchecked Sendable {
     @Test
     func registerUser_doesNotSendEmailVerification_whenRegistrationFails() async {
         // When
-        mockAuthManager.stubbedCreateUserError = AuthError.networkError
+        mockAuthProvider.stubbedCreateUserError = AuthError.networkError
         await sut.registerUser()
 
         // Then
-        #expect(mockAuthManager.invokedSendEmailVerificationCount == 0)
+        #expect(mockAuthProvider.invokedSendEmailVerificationCount == 0)
     }
 
     /// Ensures validation sheet is not toggled when registration fails
     @Test
     func registerUser_doesNotToggleValidationSheet_whenRegistrationFails() async {
         // When
-        mockAuthManager.stubbedCreateUserError = AuthError.networkError
+        mockAuthProvider.stubbedCreateUserError = AuthError.networkError
         await sut.registerUser()
 
         // Then

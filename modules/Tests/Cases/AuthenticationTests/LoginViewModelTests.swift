@@ -8,10 +8,10 @@ import Foundation
 import Testing
 
 @testable import Authentication
-import AuthManager
+import AuthProvider
 import Factory
 
-// MARK: - AuthManagerTests
+// MARK: - AuthProviderTests
 @Suite(.serialized)
 @MainActor
 final class LoginViewModelTests: BaseTestCase, @unchecked Sendable {
@@ -60,17 +60,17 @@ final class LoginViewModelTests: BaseTestCase, @unchecked Sendable {
         // Given
         sut.email = email
         sut.password = password
-        mockAuthManager.stubbedIsEmailVerifiedResult = true
+        mockAuthProvider.stubbedIsEmailVerifiedResult = true
 
         // When
         await sut.loginUser()
 
         // Then
-        #expect(mockAuthManager.invokedLoginUserCount == 1)
-        #expect(mockAuthManager.invokedLoginUserParameters?.email == email)
-        #expect(mockAuthManager.invokedLoginUserParameters?.password == password)
+        #expect(mockAuthProvider.invokedLoginUserCount == 1)
+        #expect(mockAuthProvider.invokedLoginUserParameters?.email == email)
+        #expect(mockAuthProvider.invokedLoginUserParameters?.password == password)
 
-        #expect(mockAuthManager.invokedIsEmailVerifiedCount == 1)
+        #expect(mockAuthProvider.invokedIsEmailVerifiedCount == 1)
 
         #expect(sut.alertError == nil)
         #expect(sut.showValidationSheet == false)
@@ -82,14 +82,14 @@ final class LoginViewModelTests: BaseTestCase, @unchecked Sendable {
         // Given
         sut.email = email
         sut.password = password
-        mockAuthManager.stubbedLoginUserError = AuthError.networkError
+        mockAuthProvider.stubbedLoginUserError = AuthError.networkError
 
         // When
         await sut.loginUser()
 
         // Then
-        #expect(mockAuthManager.invokedLoginUserCount == 1)
-        #expect(mockAuthManager.invokedIsEmailVerifiedCount == 0)
+        #expect(mockAuthProvider.invokedLoginUserCount == 1)
+        #expect(mockAuthProvider.invokedIsEmailVerifiedCount == 0)
 
         let authError = try #require(sut.alertError as? AuthError)
         #expect(authError == AuthError.networkError)
@@ -99,7 +99,7 @@ final class LoginViewModelTests: BaseTestCase, @unchecked Sendable {
     @Test
     func loginUser_throwsInvalidCredential_whenUserNotFoundOrWrongPassword() async throws {
         // When
-        mockAuthManager.stubbedLoginUserError = AuthError.userNotFound
+        mockAuthProvider.stubbedLoginUserError = AuthError.userNotFound
         await sut.loginUser()
 
         // Then
@@ -107,7 +107,7 @@ final class LoginViewModelTests: BaseTestCase, @unchecked Sendable {
         #expect(authError == AuthError.invalidCredentials)
 
         // When
-        mockAuthManager.stubbedLoginUserError = AuthError.wrongPassword
+        mockAuthProvider.stubbedLoginUserError = AuthError.wrongPassword
         await sut.loginUser()
 
         // Then
@@ -115,7 +115,7 @@ final class LoginViewModelTests: BaseTestCase, @unchecked Sendable {
         #expect(authError == AuthError.invalidCredentials)
 
         // When
-        mockAuthManager.stubbedLoginUserError = AuthError.invalidEmail
+        mockAuthProvider.stubbedLoginUserError = AuthError.invalidEmail
         await sut.loginUser()
 
         // Then
@@ -129,14 +129,14 @@ final class LoginViewModelTests: BaseTestCase, @unchecked Sendable {
         // Given
         sut.email = email
         sut.password = password
-        mockAuthManager.stubbedIsEmailVerifiedError = AuthError.networkError
+        mockAuthProvider.stubbedIsEmailVerifiedError = AuthError.networkError
 
         // When
         await sut.loginUser()
 
         // Then
-        #expect(mockAuthManager.invokedLoginUserCount == 1)
-        #expect(mockAuthManager.invokedIsEmailVerifiedCount == 1)
+        #expect(mockAuthProvider.invokedLoginUserCount == 1)
+        #expect(mockAuthProvider.invokedIsEmailVerifiedCount == 1)
 
         let authError = try #require(sut.alertError as? AuthError)
         #expect(authError == AuthError.networkError)
@@ -149,13 +149,13 @@ final class LoginViewModelTests: BaseTestCase, @unchecked Sendable {
         // Given
         sut.email = email
         sut.password = password
-        mockAuthManager.stubbedIsEmailVerifiedResult = false
+        mockAuthProvider.stubbedIsEmailVerifiedResult = false
 
         // When
         await sut.loginUser()
 
-        #expect(mockAuthManager.invokedLoginUserCount == 1)
-        #expect(mockAuthManager.invokedIsEmailVerifiedCount == 1)
+        #expect(mockAuthProvider.invokedLoginUserCount == 1)
+        #expect(mockAuthProvider.invokedIsEmailVerifiedCount == 1)
 
         // Then
         #expect(sut.alertError == nil)
@@ -167,7 +167,7 @@ final class LoginViewModelTests: BaseTestCase, @unchecked Sendable {
     func loginUser_setsAuthError_whenErrorOccurs() async throws {
         // When
         sut.alertError = nil
-        mockAuthManager.stubbedLoginUserError = AuthError.networkError
+        mockAuthProvider.stubbedLoginUserError = AuthError.networkError
         await sut.loginUser()
 
         // Then
@@ -179,7 +179,7 @@ final class LoginViewModelTests: BaseTestCase, @unchecked Sendable {
     @Test
     func loginUser_doesNotToggleValidationSheet_whenRegistrationFails() async {
         // When
-        mockAuthManager.stubbedLoginUserError = AuthError.networkError
+        mockAuthProvider.stubbedLoginUserError = AuthError.networkError
         await sut.loginUser()
 
         // Then

@@ -1,15 +1,6 @@
 {
-  "originHash" : "e28cdce28e9e847db0ab9e6de3aa18ef2e3fd1a2b432c4bd98954427d6f9b31f",
+  "originHash" : "e5e1f3ad7f20cb403782bf9268657f8b9ee96410ce2a0feb59ade7f56e483582",
   "pins" : [
-    {
-      "identity" : "factory",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/hmlongco/Factory",
-      "state" : {
-        "revision" : "ccc898f21992ebc130bc04cc197460a5ae230bcf",
-        "version" : "2.5.3"
-      }
-    },
     {
       "identity" : "lottie-spm",
       "kind" : "remoteSourceControl",

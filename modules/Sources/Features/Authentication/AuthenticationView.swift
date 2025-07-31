@@ -4,18 +4,28 @@
 //
 //  Created by Krzysiek on 2024-12-12.
 //
-import Lottie
 import SwiftUI
-import UIComponents
+
 import AppInfo
+import AuthProvider
+import Lottie
+import UIComponents
 
 // MARK: - AuthenticationView
 public struct AuthenticationView: View {
+    // MARK: Properties
+    let authProvider: AuthProviderProtocol
+    let authHandler: (AuthState) -> Void
+
     // MARK: Lifecycle
-    public init() {}
+    public init(authProvider: any AuthProviderProtocol, authHandler: @escaping (AuthState) -> Void) {
+        self.authProvider = authProvider
+        self.authHandler = authHandler
+    }
+
+    // MARK: Content Properties
 
     // MARK: Content
-
     public var body: some View {
         NavigationStack {
             ZStack {
@@ -28,12 +38,12 @@ public struct AuthenticationView: View {
 
                     VStack {
                         NavigationLink("Create account") {
-                            RegisterView()
+                            RegisterView(authProvider: authProvider, authHandler: authHandler)
                         }
                         .buttonStyle(MainButtonStyle())
 
                         NavigationLink("Login") {
-                            LoginView()
+                            LoginView(authProvider: authProvider, authHandler: authHandler)
                         }
                         .buttonStyle(LoginButtonStyle())
                     }
@@ -63,9 +73,4 @@ public struct AuthenticationView: View {
         }
         .frame(maxHeight: .infinity, alignment: .top)
     }
-}
-
-#Preview {
-    AuthenticationView()
-        .preferredColorScheme(.dark)
 }

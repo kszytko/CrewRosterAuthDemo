@@ -1,13 +1,13 @@
 //
-//  MockAuthManager.swift
+//  MockAuthProvider.swift
 //  CabinCrewRoster
 //
 //  Created by Krzysiek on 2024-12-11.
 //
 import Foundation
-import AuthManager
+import AuthProvider
 
-public class MockAuthManager: AuthManagerProtocol, @unchecked Sendable{
+public class MockAuthProvider: AuthProviderProtocol, @unchecked Sendable{
     var invokedCurrentUser = false
     var invokedCurrentUserCount = 0
     var stubbedCurrentUserResult: UserAdapterProtocol!

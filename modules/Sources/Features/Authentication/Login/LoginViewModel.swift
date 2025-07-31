@@ -4,49 +4,54 @@
 //
 //  Created by Krzysiek on 2024-12-08.
 //
-import AuthManager
-import Factory
-import Logger
 import SwiftUI
+
+import AuthProvider
+import Logger
 
 private let logger = CLogger(category: "LoginViewModel")
 
 // MARK: - LoginViewModel
-@MainActor
 @Observable
+@MainActor
 final class LoginViewModel {
     // MARK: Properties
     var email: String = ""
     var password: String = ""
 
     var showValidationSheet = false
-    var showWelcomeView = false
-    var inProgress = false
-
+    var processState: ProcessState = .idle
+    
     var alertError: (any Error)?
     var emailError: (any Error)?
     var passwordError: (any Error)?
 
-    @ObservationIgnored @Injected(\.authManager) private var authManager
+    private let authProvider: any AuthProviderProtocol
 
     // MARK: Computed Properties
     var disableSubmit: Bool {
         email.isEmpty || password.isEmpty
     }
 
+    // MARK: Lifecycle
+    init(authProvider: any AuthProviderProtocol) {
+        self.authProvider = authProvider
+    }
+
     // MARK: Functions
     func loginUser() async {
-        inProgress = true
+        processState = .inProgress
         cleanUpErrors()
         await signOut()
 
         do {
             try await loginAndVerifyUser()
         } catch {
+            processState = .failed
             handleError(error)
         }
 
-        inProgress = false
+        processState = .finalizing
     }
 
     func finaliseVerification() {
@@ -54,17 +59,17 @@ final class LoginViewModel {
         password.removeAll()
 
         showValidationSheet = false
-        showWelcomeView = true
+        processState = .completed
     }
 
     private func signOut() async {
-        try? await authManager.signOut()
+        try? await authProvider.signOut()
     }
 
     private func loginAndVerifyUser() async throws(AuthError) {
-        try await authManager.loginUser(email: email, password: password)
+        try await authProvider.loginUser(email: email, password: password)
 
-        guard try await authManager.isEmailVerified() else {
+        guard try await authProvider.isEmailVerified() else {
             showValidationSheet = true
             return
         }

@@ -9,9 +9,9 @@ import Foundation
 import Testing
 
 @testable import Authentication
-import AuthManager
+import AuthProvider
 
-// MARK: - AuthManagerTests
+// MARK: - AuthProviderTests
 @Suite(.serialized)
 @MainActor
 final class ResetPasswordViewModelTests: BaseTestCase, @unchecked Sendable {
@@ -58,8 +58,8 @@ final class ResetPasswordViewModelTests: BaseTestCase, @unchecked Sendable {
         await sut.sendPasswordReset()
 
         // Then
-        #expect(mockAuthManager.invokedSendPasswordResetCount == 1)
-        #expect(mockAuthManager.invokedSendPasswordResetParameters?.email == email)
+        #expect(mockAuthProvider.invokedSendPasswordResetCount == 1)
+        #expect(mockAuthProvider.invokedSendPasswordResetParameters?.email == email)
 
         #expect(sut.alertError == nil)
         #expect(sut.showInformationSheet == true)
@@ -70,14 +70,14 @@ final class ResetPasswordViewModelTests: BaseTestCase, @unchecked Sendable {
     func showInformationSheet_whenSendPasswordResetThrowsError() async throws {
         // Given
         sut.email = email
-        mockAuthManager.stubbedSendPasswordResetError = AuthError.invalidEmail
+        mockAuthProvider.stubbedSendPasswordResetError = AuthError.invalidEmail
 
         // When
         await sut.sendPasswordReset()
 
         // Then
-        #expect(mockAuthManager.invokedSendPasswordResetCount == 1)
-        #expect(mockAuthManager.invokedSendPasswordResetParameters?.email == email)
+        #expect(mockAuthProvider.invokedSendPasswordResetCount == 1)
+        #expect(mockAuthProvider.invokedSendPasswordResetParameters?.email == email)
 
         let authError = try #require(sut.alertError as? AuthError)
         #expect(authError == AuthError.invalidEmail)

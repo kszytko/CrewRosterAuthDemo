@@ -5,14 +5,22 @@
 //  Created by Krzysiek on 2024-12-08.
 //
 import SwiftUI
+
+import AuthProvider
 import UIComponents
 
 // MARK: - LoginView
 struct ResetPasswordView: View {
-    // MARK: Properties
-    @State var viewModel = ResetPasswordViewModel()
-
+    // MARK: SwiftUI Properties
+    @State private var viewModel: ResetPasswordViewModel
     @FocusState private var focusedField: CustomTextFieldType?
+
+    // MARK: Lifecycle
+    init(authProvider: any AuthProviderProtocol) {
+        self.viewModel = ResetPasswordViewModel(authProvider: authProvider)
+    }
+
+    // MARK: Content Properties
 
     // MARK: Content
     var body: some View {
@@ -31,15 +39,15 @@ struct ResetPasswordView: View {
 
     @ViewBuilder
     var content: some View {
-            VStack(alignment: .leading, spacing: Spacing.l) {
-                title
-                fields
-                submitButton
+        VStack(alignment: .leading, spacing: Spacing.l) {
+            title
+            fields
+            submitButton
 
-                Spacer()
-            }
-            .padding()
-            .applyScreenBackground()
+            Spacer()
+        }
+        .padding()
+        .applyScreenBackground()
     }
 
     @ViewBuilder
@@ -65,7 +73,7 @@ struct ResetPasswordView: View {
         Button("Reset password") {
             sendPasswordReset()
         }
-        .buttonStyle(ProgressButtonStyle(inProgress: viewModel.inProgress))
+        .buttonStyle(ProgressButtonStyle(inProgress: viewModel.processState == .inProgress))
         .disabled(viewModel.disableSubmit)
         .padding(.top)
     }
@@ -76,8 +84,4 @@ struct ResetPasswordView: View {
             await viewModel.sendPasswordReset()
         }
     }
-}
-
-#Preview {
-    ResetPasswordView()
 }

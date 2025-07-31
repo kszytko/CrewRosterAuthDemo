@@ -5,20 +5,23 @@
 //  Created by Krzysiek on 25/07/2025.
 //
 
-import SwiftUI
 import Authentication
+import AuthProvider
+import SwiftUI
 
 @main
 struct AuthDemoApp: App {
     var body: some Scene {
         WindowGroup {
-            AuthenticationView()
+            AuthenticationView(authProvider: AuthProviderDummy(), authHandler: { _ in })
                 .preferredColorScheme(.dark)
         }
     }
 }
 
-#Preview{
-    AuthenticationView()
-        .preferredColorScheme(.dark)
+#Preview {
+    AuthenticationView(authProvider: AuthProviderDummy()) { state in
+        debugPrint(state)
+    }
+    .preferredColorScheme(.dark)
 }

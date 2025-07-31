@@ -8,7 +8,7 @@ import ErrorMapper
 import Foundation
 
 // MARK: - AuthError
-public enum AuthError: LocalizedError, ErrorMapper, ErrorEquatable{
+public enum AuthError: LocalizedError, ErrorEquatable{
     case invalidCredentials
     case emailAlreadyInUse
     case userNotFound
@@ -68,11 +68,5 @@ public enum AuthError: LocalizedError, ErrorMapper, ErrorEquatable{
         default:
             "Please try again."
         }
-    }
-
-    // MARK: Lifecycle
-    public init(_ error: any Error) {
-        // TODO: Map from store error
-        self = .unknownError(error)
     }
 }

@@ -12,7 +12,7 @@ public protocol ErrorMapper: Error {
 }
 
 extension ErrorMapper {
-    public static func map<T>(closure: () async throws -> T) async throws(Self) -> T {
+    public static func map<T>(closure: () async throws -> T) async rethrows -> T {
         do {
             return try await closure()
         } catch {
@@ -20,7 +20,7 @@ extension ErrorMapper {
         }
     }
 
-    public static func map<T>(closure: () throws -> T) throws(Self) -> T {
+    public static func map<T>(closure: () throws -> T) rethrows -> T {
         do {
             return try closure()
         } catch {

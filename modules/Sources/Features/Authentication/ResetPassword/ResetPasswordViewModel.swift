@@ -4,52 +4,58 @@
 //
 //  Created by Krzysiek on 2024-12-08.
 //
-import Logger
 import SwiftUI
-import AuthManager
-import Factory
+
+import AuthProvider
+import Logger
 
 private let logger = CLogger(category: "ResetPasswordViewModel")
 
 // MARK: - ResetPasswordViewModel
-@MainActor
 @Observable
-class ResetPasswordViewModel {
+@MainActor
+final class ResetPasswordViewModel {
     // MARK: Properties
     var showInformationSheet = false
-    var inProgress = false
+    var processState: ProcessState = .idle
     var emailSent: Bool = false
 
     var alertError: (any Error)?
     var emailError: (any Error)?
 
-    @ObservationIgnored @Injected(\.authManager) private var authManager
-
-    // MARK: Computed Properties
     var email: String = "" {
         didSet {
             emailSent = false
         }
     }
 
+    private let authProvider: any AuthProviderProtocol
+
+    // MARK: Computed Properties
     var disableSubmit: Bool {
-        email.isEmpty || emailSent || inProgress
+        email.isEmpty || emailSent || processState == .inProgress
+    }
+
+    // MARK: Lifecycle
+    init(authProvider: any AuthProviderProtocol) {
+        self.authProvider = authProvider
     }
 
     // MARK: Functions
     func sendPasswordReset() async {
-        inProgress = true
+        processState = .inProgress
         emailSent = true
         cleanUpErrors()
 
         do {
-            try await authManager.sendPasswordReset(email: email)
+            try await authProvider.sendPasswordReset(email: email)
         } catch {
+            processState = .failed
             handleError(error)
         }
 
         showInformationSheet = true
-        inProgress = false
+        processState = .completed
     }
 
     private func cleanUpErrors() {

@@ -4,27 +4,26 @@ import PackageDescription
 
 var dependenciesProducts: [PackageDescription.Product] = [
     .library(name: "AppInfo", targets: ["AppInfo"]),
-    .library(name: "AuthManager", targets: ["AuthManager"]),
+    .library(name: "AuthProvider", targets: ["AuthProvider"]),
     .library(name: "ErrorMapper", targets: ["ErrorMapper"]),
     .library(name: "Logger", targets: ["Logger"]),
 ]
 
 var dependenciesTargets: [PackageDescription.Target] = [
     .target(
-        name: "AuthManager",
-        dependencies: [
-            "ErrorMapper",
-            "Logger",
-            .product(name: "Factory", package: "Factory"),
-        ],
-        path: "Sources/Dependencies/AuthManager"
-    ),
-    .target(
         name: "AppInfo",
         dependencies: [
         ],
         path: "Sources/Dependencies/AppInfo",
         swiftSettings: [.define("PRODUCTION", .when(configuration: .release))]
+    ),
+    .target(
+        name: "AuthProvider",
+        dependencies: [
+            "ErrorMapper",
+            "Logger",
+        ],
+        path: "Sources/Dependencies/AuthProvider"
     ),
     .target(
         name: "ErrorMapper",
@@ -49,9 +48,8 @@ var featuresTargets: [PackageDescription.Target] = [
         name: "Authentication",
         dependencies: [
             "AppInfo",
-            "AuthManager",
+            "AuthProvider",
             "UIComponents",
-            .product(name: "Factory", package: "Factory"),
             .product(name: "Lottie", package: "lottie-spm"),
         ],
         path: "Sources/Features/Authentication",
@@ -108,8 +106,6 @@ let package = Package(
     products: dependenciesProducts + featuresProducts + additionalProducts,
     dependencies: [
         .package(url: "https://github.com/airbnb/lottie-spm", from: "4.5.0"),
-        .package(url: "https://github.com/hmlongco/Factory", from: "2.4.3"),
     ],
     targets: dependenciesTargets + featuresTargets + additionalTargets + testTargets
 )
-

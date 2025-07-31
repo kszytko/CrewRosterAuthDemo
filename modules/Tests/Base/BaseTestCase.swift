@@ -7,7 +7,7 @@ import Testing
 // MARK: - BaseTestCase
 class BaseTestCase: @unchecked Sendable {
     // MARK: Properties
-    var mockAuthManager: MockAuthManager!
+    var mockAuthProvider: MockAuthProvider!
     var mockUserService: MockUserService!
     var mockAuthService: MockAuthService!
 
@@ -28,18 +28,18 @@ extension BaseTestCase {
     private func setupDoubles() {
         mockUserService = MockUserService()
         mockAuthService = MockAuthService(user: mockUserService)
-        mockAuthManager = MockAuthManager()
+        mockAuthProvider = MockAuthProvider()
     }
 
     private func setUpFactoryContainers() {
         Container.shared.reset()
-        Container.shared.authManager.register { self.mockAuthManager }
+        Container.shared.authProvider.register { self.mockAuthProvider }
         Container.shared.authService.register { self.mockAuthService }
     }
 
     /// Clear all doubles present in the project.
     private func tearDownDoubles() {
-        mockAuthManager = .none
+        mockAuthProvider = .none
         mockUserService = .none
         mockAuthService = .none
     }

@@ -8,10 +8,10 @@ import Foundation
 import Testing
 
 @testable import Authentication
-import AuthManager
+import AuthProvider
 import Factory
 
-// MARK: - AuthManagerTests
+// MARK: - AuthProviderTests
 @Suite(.serialized)
 final class VerifyEmailViewModelTests: BaseTestCase, @unchecked Sendable {
     // MARK: Properties
@@ -34,37 +34,37 @@ final class VerifyEmailViewModelTests: BaseTestCase, @unchecked Sendable {
     // MARK: Functions
     @Test
     func verificationStops_WhenEmailVerifiedImmediately() async {
-        mockAuthManager.stubbedIsEmailVerifiedResult = true
+        mockAuthProvider.stubbedIsEmailVerifiedResult = true
         await sut.runVerificationLoop()
 
         #expect(sut.isEmailVerified == true)
-        #expect(mockAuthManager.invokedIsEmailVerifiedCount == 1)
+        #expect(mockAuthProvider.invokedIsEmailVerifiedCount == 1)
         #expect(sut.alertError == nil)
     }
 
     @Test
     func verificationRetriesUntilSuccess() async {
         // Given
-        mockAuthManager.stubbedIsEmailVerifiedClosure = { invokedIsEmailVerifiedCount in
+        mockAuthProvider.stubbedIsEmailVerifiedClosure = { invokedIsEmailVerifiedCount in
             invokedIsEmailVerifiedCount >= 5
         }
 
         await sut.runVerificationLoop()
 
         #expect(sut.isEmailVerified == true)
-        #expect(mockAuthManager.invokedIsEmailVerifiedCount == 5)
+        #expect(mockAuthProvider.invokedIsEmailVerifiedCount == 5)
         #expect(sut.alertError == nil)
     }
 
     @Test
     func verificationHandlesError_AndStops() async throws {
         // Ustaw odpowiedź zwracającą true od razu.
-        mockAuthManager.stubbedIsEmailVerifiedError = AuthError.invalidEmail
+        mockAuthProvider.stubbedIsEmailVerifiedError = AuthError.invalidEmail
 
         await sut.runVerificationLoop()
 
         #expect(sut.isEmailVerified == false)
-        #expect(mockAuthManager.invokedIsEmailVerifiedCount == 1)
+        #expect(mockAuthProvider.invokedIsEmailVerifiedCount == 1)
 
         let authError = try #require(sut.alertError as? AuthError)
         #expect(authError == AuthError.invalidEmail)

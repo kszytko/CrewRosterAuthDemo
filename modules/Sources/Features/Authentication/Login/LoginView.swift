@@ -4,16 +4,29 @@
 //
 //  Created by Krzysiek on 2024-12-08.
 //
-import AuthManager
 import SwiftUI
+
+import AuthProvider
 import UIComponents
 
 // MARK: - LoginView
 struct LoginView: View {
-    // MARK: Properties
-    @State var viewModel = LoginViewModel()
-
+    // MARK: SwiftUI Properties
+    @State private var viewModel: LoginViewModel
     @FocusState private var focusedField: CustomTextFieldType?
+
+    // MARK: Properties
+    private let authHandler: (AuthState) -> Void
+    private let authProvider: any AuthProviderProtocol
+
+    // MARK: Lifecycle
+    init(authProvider: any AuthProviderProtocol, authHandler: @escaping (AuthState) -> Void) {
+        self.authHandler = authHandler
+        self.authProvider = authProvider
+        self.viewModel = LoginViewModel(authProvider: authProvider)
+    }
+
+    // MARK: Content Properties
 
     // MARK: Content
     var body: some View {
@@ -21,13 +34,14 @@ struct LoginView: View {
             content
         }
         .sheet(isPresented: $viewModel.showValidationSheet) {
-            VerifyEmailView(onValidationSuccess: viewModel.finaliseVerification)
+            VerifyEmailView(authProvider: authProvider, onValidationSuccess: viewModel.finaliseVerification)
                 .presentationDetents([.medium])
                 .presentationCornerRadius(10)
                 .presentationBackgroundInteraction(.enabled)
         }
-        .navigationDestination(isPresented: $viewModel.showWelcomeView) {
-            ValidationView()
+        .onChange(of: viewModel.processState) { _, state in
+            guard state == .completed else { return }
+            authHandler(.loggedIn)
         }
         .onAppear {
             focusedField = .email
@@ -79,7 +93,7 @@ struct LoginView: View {
     @ViewBuilder
     var resetButton: some View {
         NavigationLink("Forgot password?") {
-            ResetPasswordView()
+            ResetPasswordView(authProvider: authProvider)
         }
         .frame(maxWidth: .infinity)
     }
@@ -89,7 +103,7 @@ struct LoginView: View {
         Button("Log In") {
             loginUser()
         }
-        .buttonStyle(ProgressButtonStyle(inProgress: viewModel.inProgress))
+        .buttonStyle(ProgressButtonStyle(inProgress: viewModel.processState == .inProgress))
         .disabled(viewModel.disableSubmit)
     }
 
@@ -100,9 +114,4 @@ struct LoginView: View {
         }
         resignKeyboard()
     }
-}
-
-#Preview("Login") {
-    LoginView()
-        .preferredColorScheme(.dark)
 }

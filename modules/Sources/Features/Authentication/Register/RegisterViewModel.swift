@@ -4,11 +4,9 @@
 //
 //  Created by Krzysiek on 2024-12-08.
 //
-import SwiftData
 import SwiftUI
 
-import AuthManager
-import Factory
+import AuthProvider
 import Logger
 
 private let logger = CLogger(category: "RegisterViewModel")
@@ -16,30 +14,34 @@ private let logger = CLogger(category: "RegisterViewModel")
 // MARK: - RegisterViewModel
 @MainActor
 @Observable
-class RegisterViewModel {
+final class RegisterViewModel {
     // MARK: Properties
     var staffNumber: String = ""
     var email: String = ""
     var password: String = ""
 
     var showValidationSheet = false
-    var showWelcomeView = false
-    var inProgress = false
+    var processState: ProcessState = .idle
 
     var alertError: (any Error)?
     var emailError: (any Error)?
     var passwordError: (any Error)?
 
-    @ObservationIgnored @Injected(\.authManager) private var authManager
+    private let authProvider: any AuthProviderProtocol
 
     // MARK: Computed Properties
     var disableSubmit: Bool {
-        staffNumber.isEmpty || email.isEmpty || password.isEmpty || inProgress
+        staffNumber.isEmpty || email.isEmpty || password.isEmpty || processState == .inProgress
+    }
+
+    // MARK: Lifecycle
+    init(authProvider: any AuthProviderProtocol) {
+        self.authProvider = authProvider
     }
 
     // MARK: Functions
     func registerUser() async {
-        inProgress = true
+        processState = .inProgress
         cleanUpErrors()
         await signOut()
 
@@ -49,6 +51,8 @@ class RegisterViewModel {
 
             showValidationSheet.toggle()
         } catch {
+            processState = .failed
+
             if error is AuthError {
                 handleError(error as! AuthError)
             } else {
@@ -56,7 +60,7 @@ class RegisterViewModel {
             }
         }
 
-        inProgress = false
+        processState = .finalizing
     }
 
     func finaliseVerification() {
@@ -65,7 +69,7 @@ class RegisterViewModel {
         password.removeAll()
 
         showValidationSheet = false
-        showWelcomeView = true
+        processState = .completed
     }
 
     private func cleanUpErrors() {
@@ -75,32 +79,29 @@ class RegisterViewModel {
     }
 
     private func signOut() async {
-        try? await authManager.signOut()
+        try? await authProvider.signOut()
     }
 
     private func performUserRegistration() async throws {
         do {
             try await createUserAndStoreData()
         } catch {
-            try? await authManager.deleteUser()
+            try? await authProvider.deleteUser()
             throw error
         }
     }
 
     private func performEmailVerification() async throws {
         do {
-            try await authManager.sendEmailVerification()
+            try await authProvider.sendEmailVerification()
         } catch {
-            try? await authManager.signOut()
+            try? await authProvider.signOut()
             throw error
         }
     }
 
     private func createUserAndStoreData() async throws {
-        guard let _ = try await authManager.createUser(email: email, password: password) else {
-            throw AuthError.operationNotAllowed
-        }
-        // TODO: Store user on online store
+        try await authProvider.createUser(email: email, password: password)
     }
 
     private func handleError(_ error: AuthError) {

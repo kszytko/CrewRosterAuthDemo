@@ -44,7 +44,3 @@ public extension View {
         }
     }
 }
-
-#Preview {
-    AppInfo()
-}

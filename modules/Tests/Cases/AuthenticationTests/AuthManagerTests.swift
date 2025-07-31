@@ -1,5 +1,5 @@
 //
-//  AuthManagerTests.swift
+//  AuthProviderTests.swift
 //  CabinCrewRosterTests
 //
 //  Created by Krzysiek on 2024-12-09.
@@ -8,19 +8,19 @@
 import Foundation
 import Testing
 
-@testable import AuthManager
+@testable import AuthProvider
 import Factory
 
-// MARK: - AuthManagerTests
+// MARK: - AuthProviderTests
 @Suite(.serialized)
-final class AuthManagerTests: BaseTestCase, @unchecked Sendable {
+final class AuthProviderTests: BaseTestCase, @unchecked Sendable {
     // MARK: Properties
-    var sut: AuthManager!
+    var sut: AuthProvider!
 
     // MARK: Lifecycle
     override init() {
         super.init()
-        self.sut = AuthManager()
+        self.sut = AuthProvider()
     }
 
     deinit {

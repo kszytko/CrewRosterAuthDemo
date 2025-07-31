@@ -4,16 +4,28 @@
 //
 //  Created by Krzysiek on 2024-12-08.
 //
-import Design
 import SwiftUI
+
+import AuthProvider
+import Design
 import UIComponents
 
 // MARK: - RegisterView
 struct RegisterView: View {
     // MARK: SwiftUI Properties
-    @State var viewModel = RegisterViewModel()
-
+    @State private var viewModel: RegisterViewModel
     @FocusState private var focusedField: CustomTextFieldType?
+
+    // MARK: Properties
+    private let authHandler: (AuthState) -> Void
+    private let authProvider: any AuthProviderProtocol
+
+    // MARK: Lifecycle
+    init(authProvider: any AuthProviderProtocol, authHandler: @escaping (AuthState) -> Void) {
+        self.authHandler = authHandler
+        self.authProvider = authProvider
+        self.viewModel = RegisterViewModel(authProvider: authProvider)
+    }
 
     // MARK: Content Properties
 
@@ -23,12 +35,13 @@ struct RegisterView: View {
             content
         }
         .sheet(isPresented: $viewModel.showValidationSheet) {
-            VerifyEmailView(onValidationSuccess: viewModel.finaliseVerification)
+            VerifyEmailView(authProvider: authProvider, onValidationSuccess: viewModel.finaliseVerification)
                 .presentationDetents([.medium])
                 .presentationCornerRadius(Size.s12)
         }
-        .navigationDestination(isPresented: $viewModel.showWelcomeView) {
-            ValidationView()
+        .onChange(of: viewModel.processState) { _, state in
+            guard state == .completed else { return }
+            authHandler(.registered)
         }
         .onAppear {
             focusedField = .staffNumber
@@ -100,7 +113,7 @@ struct RegisterView: View {
         Button("Sign Up") {
             registerUser()
         }
-        .buttonStyle(ProgressButtonStyle(inProgress: viewModel.inProgress))
+        .buttonStyle(ProgressButtonStyle(inProgress: viewModel.processState == .inProgress))
         .disabled(viewModel.disableSubmit)
         .padding(.top)
     }
@@ -111,9 +124,4 @@ struct RegisterView: View {
             await viewModel.registerUser()
         }
     }
-}
-
-#Preview {
-    RegisterView()
-        .preferredColorScheme(.dark)
 }

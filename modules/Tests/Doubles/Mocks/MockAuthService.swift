@@ -5,7 +5,7 @@
 //  Created by Krzysiek on 2024-12-10.
 //
 import Foundation
-import AuthManager
+import AuthProvider
 
 class MockAuthService: AuthServiceProtocol, @unchecked Sendable{
     var invokedCurrentUserGetter = false

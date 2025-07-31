@@ -4,15 +4,27 @@
 //
 //  Created by Krzysiek on 2024-12-03.
 //
-import Lottie
 import SwiftUI
+
+import AuthProvider
+import Lottie
 import UIComponents
 
 // MARK: - VerifyEmailView
 struct VerifyEmailView: View {
+    // MARK: SwiftUI Properties
+    @State private var viewModel: VerifyEmailViewModel
+
     // MARK: Properties
-    @State var viewModel = VerifyEmailViewModel()
-    var onValidationSuccess: (() -> Void)?
+    private let onValidationSuccess: (() -> Void)?
+
+    // MARK: Lifecycle
+    init(authProvider: any AuthProviderProtocol, onValidationSuccess: (() -> Void)?) {
+        self.viewModel = VerifyEmailViewModel(authProvider: authProvider)
+        self.onValidationSuccess = onValidationSuccess
+    }
+
+    // MARK: Content Properties
 
     // MARK: Content
     var body: some View {
@@ -21,9 +33,8 @@ struct VerifyEmailView: View {
                 viewModel.startVerification()
             }
             .onChange(of: viewModel.isEmailVerified) { _, isVerified in
-                if isVerified {
-                    onValidationSuccess?()
-                }
+                guard isVerified else { return }
+                onValidationSuccess?()
             }
             .onDisappear {
                 viewModel.stopVerification()
@@ -70,14 +81,4 @@ struct VerifyEmailView: View {
             await viewModel.sendVerificationEmail()
         }
     }
-}
-
-#Preview {
-    VStack {}
-        .preferredColorScheme(.dark)
-        .sheet(isPresented: .constant(true)) {
-            VerifyEmailView()
-                .presentationDetents([.medium])
-                .presentationCornerRadius(10)
-        }
 }
